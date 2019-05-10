@@ -8,3 +8,5 @@ This is the documentation, data and code supporting the paper:
 Hanigan I.C., Williamson G.W., Larsen A., Horsley, J., Qin Y., Cope M., Rappold, A., Morgan G.G.
 
 Draft 2019-05-10
+
+![figs/qc_locs.png](figs/qc_locs.png)
