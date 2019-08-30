@@ -1,27 +1,8 @@
---- 
-title: "A dataset for training a predictive model to identify bushfire smoke plumes from satellite images."
-author: "Hanigan I.C., Williamson G.W., Larsen A., Horsley, J., Qin Y., Cope M., Rappold, A., Morgan G.G."
-date: "Draft `r Sys.Date()`"
-site: bookdown::bookdown_site
-output: bookdown::gitbook
----
+##title: "A dataset for training a predictive model to identify bushfire
+##smoke plumes from satellite images."
+##authors: "Hanigan I.C., Williamson G.W., Larsen A., Horsley, J., Qin Y.,
+##Cope M., Rappold, A., Morgan G.G."
 
-*Abstract:*
-
-We describe the data we prepared as a training dataset of bushfire smoke and fire hotspots data for a machine learning project to classify satellite image pixels as bushfire smoke. R codes and sample data files are described and shared. The prospect for future users of the data is enhanced by the description in this paper, and the availability of these data on the open access Github repository.
-
-*Keywords:* wildfire; smoke; cloud, dust; remote sensing
-
-# Introduction
-
-# Advanced Himawari Imager (AHI) atmospheric optical depth (AOD) and cloud mask data
-
-We used the processed cloud mask data derived from the satellite imagery of the Advanced Himawari Imager (AHI) data created by Qin et al. (2019). The AHI instrument is onboard the Himawari-8 satellite. The Himawari-8 records true colour imagery at 0.5 to 2 km resolution, which are averaged to 2 km by Qin et al., in 10-minute intervals. We downloaded the netCDF files available from https://hpc.csiro.au/users/254864/ML_smoke/.  TODO Do we need a reference for where the original Himawari data were downloaded from by Yi.
-
-The first step was to extract the latitude and longitude data from the netCDF file as follows:
-
-
-```{r, eval = F, echo = T}
 #### Step 1: Set up ####
 projdir <- "/home/ivan_hanigan/Dropbox/projects/air_pollution_ucrh/Smoke_plumes_in_satellite_imagery_JFSP/Smoke_plume_hotspots_ML_JFSP/manuscript/Appendix"
 setwd(projdir)
@@ -71,16 +52,6 @@ h <- dim(lats1)[1]
 w <- dim(lons1)[2]
 
 
-```
-
-The points are the centre of each pixel. These pixels are on a section of the image disc that is distorted and so the pixels are not squares in the geographical coordinate system. The shape in the figure \@ref(fig:nt-casestdy-raw) is therefore not a rectangle.
-
-```{r, nt-casestdy-raw, echo = F, fig.cap = "NT case study AHI points"}
-knitr::include_graphics("figs/qc_locs.png")
-```
-
-```{r, eval = F}
-
 
 #### Step 1.2.2: create voronoi ####
 ## we cannot transform the point data layer into a raster. so use voronoi instead
@@ -123,38 +94,6 @@ w <- w-2; w
 h*w
 
 
-```
-
-As the pixels are distorted we created Voronoi polygons which can accomodate this.
-We used the `voronoi.polygons` function from the R package `SDraw` which is a convenience routine for the `deldir` function in the R package of the same name.
-
-Trent McDonald and Aidan McDonald (2019). SDraw: Spatially Balanced Samples of Spatial Objects. R package version 2.1.8. https://CRAN.R-project.org/package=SDraw
-
-Rolf Turner (2014). deldir: Delaunay Triangulation and Dirichlet (Voronoi) Tessellation.. R package version 0.1-7. https://CRAN.R-project.org/package=deldir
-
-
-The figure \@ref(fig:nt-vor-raw) shows this result.
-
-```{r, nt-vor-raw, echo = F, fig.cap = "NT case study Voronoi around AHI points"}
-knitr::include_graphics("figs/qc_voronoi_raw.png")
-```
-
-A side effect of this function is that the edge polygons are too large, and so we restrict this based on size. Figure \@ref(fig:nt-vor-dens) shows the distribution of sizes, and we chose 0.004 square decimal degrees as the upper limit.
- 
-```{r, nt-vor-dens, echo = F, fig.cap = "NT case study Voronoi sizes"}
-knitr::include_graphics("figs/qc_voronoi_raw_density.png")
-```
-
-The resultant set of voronoi polygons is shown in figure \@ref(fig:nt-vorV2)
-
-```{r, nt-vorV2, echo = F, fig.cap = "NT case study Voronoi final set"}
-knitr::include_graphics("figs/qc_vorV2.png")
-```
-
-TODO: zoom in on one of the vornoi polygons, and cite the software used to interpolate.
-
-```{r, eval = F}
-
 
 #### Step 2.1: list AHI files available ####
 
@@ -165,14 +104,6 @@ basename(flist_ahi_cloud_mask)[invar_to_remove]
 datetimes <- matrix(unlist(strsplit(basename(flist_ahi_cloud_mask)[-invar_to_remove], "_")), ncol = 7, byrow=TRUE)[,4:5]
 unique(datetimes[,2])
 
-
-```
-
-# Recodes for missing, cloud, and AOD threshold
-
-The R code below is showing the computations for a single iteration of the loop (the full loop runs over all timepoints).
-
-```{r, echo = T, eval = F}
 
 #### Step 2.3 start loop over dates ####
 my_date <-  "20150911_0650"
@@ -286,6 +217,33 @@ table(flags_cl, useNA = "always")
 ## this shows there are 14000 "0s" and 3441 "2s" on 20150911_0650
 ## TODO: we ask the question if 'type' in these pixels should be over-ruled by cloud flag
 
+## an interesting aside re 'bits'
+## bitwise data depends on what the 0/1 value of each bit is, for example 00000001 is set first bit, 00000010 is second bit set
+## therefore 00000011 is both first and second, so would mean invalid, cloudy
+## so why is the result of bitwAnd(flags0, 2) = 0 / 2?
+## we need more info about how the AND operator compares two integer bitwise
+## https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
+## so the result is the number that represents the corresponding bits
+## table(flags0[which(flags_cl %in% 2)])
+## flags0[which(flags_cl %in% 2)[1:6]]
+## flags_cl[which(flags_cl %in% 2)[1:6]]
+## https://www.convertbinary.com/numbers/
+## 38 = 0100110
+##  2 = 0000010
+## results in 2
+## 54 = 0110110
+##  2 = 0000010
+## also results in 2
+## 70 = 1000110
+##  2 = 0000010
+## also results in 2
+## 86 = 1010110
+##  2 = 0000010
+## also results in 2
+## to look at pixels where any of the 4-7 bits are set we can use this shortcut
+## 2^4 +  2^5 + 2^6 + 2^7 = 240
+## table(bitwAnd(flags0, 240), useNA = "always")
+
 
 ## sometimes there is missing columns in the ncdf files, so we test
 ## this 
@@ -354,48 +312,6 @@ ahi_df$TIMEPOINT <- my_date
 ## finally close the netcdf file connection
 nc_close(ncin)
 
-
-
-```
-
-```{r, eval = F, echo = F}
-
-## an interesting aside re 'bits'
-## bitwise data depends on what the 0/1 value of each bit is, for example 00000001 is set first bit, 00000010 is second bit set
-## therefore 00000011 is both first and second, so would mean invalid, cloudy
-## so why is the result of bitwAnd(flags0, 2) = 0 / 2?
-## we need more info about how the AND operator compares two integer bitwise
-## https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
-## so the result is the number that represents the corresponding bits
-## table(flags0[which(flags_cl %in% 2)])
-## flags0[which(flags_cl %in% 2)[1:6]]
-## flags_cl[which(flags_cl %in% 2)[1:6]]
-## https://www.convertbinary.com/numbers/
-## 38 = 0100110
-##  2 = 0000010
-## results in 2
-## 54 = 0110110
-##  2 = 0000010
-## also results in 2
-## 70 = 1000110
-##  2 = 0000010
-## also results in 2
-## 86 = 1010110
-##  2 = 0000010
-## also results in 2
-## to look at pixels where any of the 4-7 bits are set we can use this shortcut
-## 2^4 +  2^5 + 2^6 + 2^7 = 240
-## table(bitwAnd(flags0, 240), useNA = "always")
-
-```
-
-```{r, eval = F, echo = T}
-
-
-
-```
-
-```{r, echo = F, eval = F}
 
 
 #### make true colour image RGB ####
@@ -476,25 +392,6 @@ my_plot(df=ahi_df, day_i="20150911_0650", nudgex=.25, nudgey=.25, use_points=F)
 title(my_date)
 dev.off()
 
-
-```
-
-Figure \@ref(fig:nt-ncdf-raw) shows the true colour image based on the voronoi polygons.
-
-```{r, nt-ncdf-raw, echo = F, fig.cap = "NT case study AHI cloud mask data (on voronoi)"}
-knitr::include_graphics("figs/qc_ncdf_raw.png")
-```
-
-```{r, eval = F}
-
-```
-
-# NASA Fire Hotspots
-
-We used fire hotspots data from the NASA Visible Infrared Imaging Radiometer Suite (VIIRS) I-Band 375 m fire activity data (https://firms.modaps.eosdis.nasa.gov/download).
-We added the hotspots data to the AHI cloud mask and AOD data by intersecting the points shapefile with the voronoi polygons, and average the Fire Radiative Power FRP values to summarise fire in the pixel.
-
-```{r, eval = F, echo = T}
 
 
 #### load study region bounding box ####
@@ -729,25 +626,3 @@ my_plot(day_i = my_date,
         , 
         nudgey = .25, show_smoke = T, use_points = F, clouds_from_flag = F)
 dev.off()
-
-
-```
-# Landcover
-
-TODO
-
-# Major roads
-
-TODO
-
-# Digital Elevation Model
-
-TODO
-
-# Acknowledgments
-
-Funding for this paper came from the Joint Fire Smoke Project.
-
-# References
-
-1. Qin, Y., Steven, A.D.L., Schroeder, T., Mcvicar, T.R. & Huang, J. (2019). Cloud Cover in the Australian Region: Development and Validation of a Cloud Masking, Classification and Optical Depth Retrieval Algorithm for the Advanced Himawari Imager. 7(February),: 1–21.
