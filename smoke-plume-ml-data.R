@@ -458,9 +458,8 @@ if(nrow(hotspot_my_date@data) != 0){
   names(e_HSv3)[ncol(e_HSv3)] <- "AHI_ID"
   e_HSv3 <- e_HSv3[,c("AHI_ID", "area")]
 }
-```
 
-```{r, eval = F}
+
 #### Step 4: Merge inputs ####
 ##head(ahi_df)
 names(ahi_df) <- gsub("gid", "AHI_ID", names(ahi_df))
