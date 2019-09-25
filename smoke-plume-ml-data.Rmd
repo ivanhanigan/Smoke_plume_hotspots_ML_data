@@ -361,6 +361,60 @@ nc_close(ncin)
 ```{r, eval = F, echo = F}
 
 ## an interesting aside re 'bits'
+
+## So I’m looking at the flags. Simplest way to look at things bitwise is
+## using the bitwAnd operator. Here I tell it to isolate the first bit (2^0)
+## flags[,] <- bitwAnd(flags0, 1)
+## If this bit is set anywhere then the data is not valid
+
+## If I check for the second bit (decimal = 2^1) which represents
+## cloud
+## flags_cl <- flags0[,]
+## flags_cl[,] <- bitwAnd(flags0, 2)
+##Okay now the third bit should be land – 2^3 = 8
+## More info on bits
+## https://www.arm.gov/publications/tech_reports/doe-sc-arm-tr-136.pdf
+## page A.8
+
+## bit_1 = 00000001 = 0x01 = 2^0 = 1,
+## bit_2 = 00000010 = 0x02 = 2^1 = 2,
+## bit_3 = 00000100 = 0x04 = 2^2 = 4,
+## bit_4 = 00001000 = 0x08 = 2^3 = 8,
+## bit_5 = 00010000 = 0x10 = 2^4 = 16
+
+## What Yi means when he says "if the invalid bit is set i.e. flags is an odd number":
+## https://medium.com/@Dougly/bitwise-shifting-swift-3-a85a6954fb05
+## 0 = 00000000    2 = 00000010    4 = 00000100      8 = 00001000       
+## 1 = 00000001    3 = 00000011    5 = 00000101      9 = 00001001
+##                                 6 = 00000110     10 = 00001010
+##                                 7 = 00000111     11 = 00001011
+##                                                  12 = 00001100
+##                                                  13 = 00001101
+##                                                  14 = 00001110
+##                                                  15 = 00001111
+
+##                                                  16 = 00010000
+##                                                  ...
+##                                                  32 = 00100000
+##                                                  ...
+##                                                  64 = 01000000
+##                                                  ...
+##                                                  128 = 10000000
+##                                                  ...
+##                                                  255 = 11111111
+## So bit_1 is set to 1 in any number of format xxxxxxx1 and these are all odd in list above
+## the alternative is that bit_1 is 0, like xxxxxxx0 and these are all even numbers in list
+
+## but we need to also understand the bitwise AND operator
+## https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
+## The & operator compares each binary digit of two integers and returns a new integer, with a 1 wherever both numbers had a 1 and a 0 anywhere else. A diagram is worth a thousand words, so here is one to clear things up. It represents doing 37 & 23, which equals 5.
+
+## 37 = 00100101
+## 35 = 00010111
+##  5 = 00000101
+##      FFFFFTFT
+
+
 ## bitwise data depends on what the 0/1 value of each bit is, for example 00000001 is set first bit, 00000010 is second bit set
 ## therefore 00000011 is both first and second, so would mean invalid, cloudy
 ## so why is the result of bitwAnd(flags0, 2) = 0 / 2?
