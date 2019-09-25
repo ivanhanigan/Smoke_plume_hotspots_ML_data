@@ -222,7 +222,7 @@ table(flags_cl, useNA = "always")
 ## So I’m looking at the flags. Simplest way to look at things bitwise is
 ## using the bitwAnd operator. Here I tell it to isolate the first bit (2^0)
 ## flags[,] <- bitwAnd(flags0, 1)
-## If this bit is set anywhere then the data is not valid
+## If this bit is set anywhere then the data for that pixel is not valid
 
 ## If I check for the second bit (decimal = 2^1) which represents
 ## cloud
@@ -264,7 +264,12 @@ table(flags_cl, useNA = "always")
 
 ## but we need to also understand the bitwise AND operator
 ## https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
-## The & operator compares each binary digit of two integers and returns a new integer, with a 1 wherever both numbers had a 1 and a 0 anywhere else. A diagram is worth a thousand words, so here is one to clear things up. It represents doing 37 & 23, which equals 5.
+
+## The & operator compares each binary digit of two integers and
+## returns a new integer, with a 1 wherever both numbers had a 1 and a
+## 0 anywhere else. A diagram is worth a thousand words, so here is
+## one to clear things up. It represents doing 37 & 23, which equals
+## 5.
 
 ## 37 = 00100101
 ## 35 = 00010111
